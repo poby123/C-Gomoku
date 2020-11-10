@@ -28,7 +28,7 @@ void hello(void) {
 }
 
 void drawLine(int num) {
-  int line[10] = { // 자료형을 int로 선언한 이유는 특수문자의 크기가 char 보다 큼 - MoNiSu
+  char* line[10] = { // int형 자료 선언을 char 포인터 선언으로 변경 후 잘 표시됨 - 김성렬
     "┌", "├", "└", "─┬", "─┼", "─┴", "─┐", "─┤", "─┘", "│"
   };
   printf("%s", line[num]);
