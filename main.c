@@ -2,17 +2,20 @@
 
 #include <stdio.h>
 #include <Windows.h>
+#include <conio.h>  //방향키 입력받기 - 김성렬
 
 void hello(void); // 사용자에게 안내 - MoNisu
 void drawLine(int num); // 줄 그리는 함수 - MoNiSu
 void drawBoard(void); // 바둑판 그리는 함수 - MoNiSu
 
+void enterKey(void); // 키 입력 - 김성렬
+
 int test(int t); // 기능 테스트 하는 함수 - MoNiSu
 
-
 void main(void) {
-  // hello(); // 실행 시간이 길어져 테스트 하기 힘들어 주석 처리함 - MoNiSu
-  system("cls"); // 콘솔 창 초기화 - MoNiSu
+  // hello(); 
+  // enterKey();
+  // system("cls"); // 콘솔 창 초기화 - MoNiSu
   drawBoard();
 
   // test(1); // 다 쓰면 꼭 주석 처리 해둘 것 - MoNiSu
@@ -29,7 +32,7 @@ void hello(void) {
 
 void drawLine(int num) {
   char* line[10] = { // int형 자료 선언을 char 포인터 선언으로 변경 후 잘 표시됨 - 김성렬
-    "┌", "├", "└", "─┬", "─┼", "─┴", "─┐", "─┤", "─┘", "│"
+    "┌", "├", "└", "─┬", "─┼", "─┴", "─┐", "─┤", "─┘"
   };
   printf("%s", line[num]);
   Sleep(5);
@@ -74,6 +77,10 @@ void drawBoard(void) {
       }
     }
   }
+}
+
+void enterKey(void) {
+
 }
 
 int test(int t) { // 기능 실험 후 비워 둘 것 - MoNiSu
