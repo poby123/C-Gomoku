@@ -1,32 +1,45 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <Windows.h>
 #include <conio.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <Windows.h>
 
 void hello(void); // 사용자에게 안내 - MoNisu
 void drawLine(int num); // 줄 그리는 함수 - MoNiSu
 void drawBoard(void); // 바둑판 그리는 함수 - MoNiSu
 void cursor(short x, short y); // 커서 입력 함수 - MoNiSu
-void moveCursor(int arr[20][20], int num); // 커서 움직이기, 바둑돌 두는 함수 - MoNiSu
-
-int test(int t); // 기능 테스트 하는 함수 - MoNiSu
+void playGoStone(int arr[20][20], int num); // 커서 움직이기, 바둑돌 두는 함수 - MoNiSu, 함수 이름 변경과 포인터 이용 - 김성렬
+bool rule(int arr[20][20]); // 오목 승리 조건 - 김성렬
+int test(int num); // 기능 테스트 하는 함수 - MoNiSu
 
 void main(void) {
   int board[20][20]; // 0번칸은 안 씀 1번부터 시작 예) board[10][10] == 2 가로 세로 10번째 줄 검은돌 - MoNiSu
   bool gameStatus; // true == 게임 시작 아니면 게임 중, false == 게임 끝 - MoNiSu
   int user = 2; // 2 == 검은 돌, 3 == 흰 돌 - MoNiSu
 
-  // hello(); 
-  // enterKey();
-  // system("cls"); // 콘솔 창 초기화 - MoNiSu
+  for (int i = 0; i <= 19; i++) {
+    for (int j = 0; j <= 19; j++) {
+      board[i][j] = 0;
+    }
+  }
+
+  hello();
+  system("cls"); // 콘솔 창 초기화 - MoNiSu
   drawBoard();
 
   gameStatus = true;
 
   do {
-    moveCursor(board, user);
+    playGoStone(board, user);
+
+    if (rule(board)) {
+      system("cls");
+      printf(" ***  %d 가 승리 하였습니다. ***", user);
+      exit(0);
+    }
+
     if (user == 2) {
       ++user;
     }
@@ -34,8 +47,8 @@ void main(void) {
       --user;
     }
   } while (gameStatus);
-
-  // test(1); // 다 쓰면 꼭 주석 처리 해둘 것 - MoNiSu
+  
+  //test(1); // 다 쓰면 꼭 주석 처리 해둘 것 - MoNiSu
 }
 
 void hello(void) {
@@ -101,7 +114,7 @@ void cursor(short x, short y) {
   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos); // 콘솔 출력 위치 조정 - MoNiSu
 }
 
-void moveCursor(int arr[20][20], int num) {
+void playGoStone(int arr[20][20], int num) {
   int x = 10, y = 10, key;
   cursor(x, y);
 
@@ -142,14 +155,14 @@ void moveCursor(int arr[20][20], int num) {
         }
       }
       else if (key == 32) { // 32 == 스페이스 바 - MoNiSu
-        if (arr[x][y] != 2 && arr[x][y] != 3) {
+        if (arr[x][y] == 0) {
           cursor(x, y);
           if (num == 2) {
-            printf("●");
+            printf("○");
             arr[x][y] = num; // board에 저장
           }
           else {
-            printf("○");
+            printf("●");
             arr[x][y] = num;
           }
           break;
@@ -159,7 +172,67 @@ void moveCursor(int arr[20][20], int num) {
   } while (true);
 }
 
-int test(int t) { // 기능 실험 후 비워 둘 것 - MoNiSu
-  
+bool rule(int arr[20][20]) {
+  for (int i = 1; i <= 15; i++) { // 가로 확인 - 김성렬, MoNiSu
+    for (int j = 1; j <= 19; j++) {
+      if (
+        arr[i][j] != 0
+        && arr[i][j] == arr[i + 1][j]
+        && arr[i + 1][j] == arr[i + 2][j]
+        && arr[i + 2][j] == arr[i + 3][j]
+        && arr[i + 3][j] == arr[i + 4][j]
+        ) {
+        return true;
+      }
+    }
+  }
+
+  for (int i = 1; i <= 19; i++) { // 세로 확인 - 김성렬, MoNiSu
+    for (int j = 1; j <= 15; j++) {
+      if (
+        arr [i][j] != 0 
+        && arr[i][j] == arr[i][j + 1]
+        && arr[i][j + 1] == arr[i][j + 2]
+        && arr[i][j + 2] == arr[i][j + 3]
+        && arr[i][j + 3] == arr[i][j + 4]
+        ) {
+        return true;
+      }
+    }
+  }
+
+  for (int i = 1; i <= 15; i++) { // 역슬래시 대각선 확인 - 김성렬, MoNiSu
+    for (int j = 1; j <= 15; j++) {
+      if (
+        arr[i][j] != 0
+        && arr[i][j] == arr[i + 1][j + 1]
+        && arr[i + 1][j + 1] == arr[i + 2][j + 2]
+        && arr[i + 2][j + 2] == arr[i + 3][j + 3]
+        && arr[i + 3][j + 3] == arr[i + 4][j + 4]
+        ) {
+        return true;
+      }
+    }
+  }
+
+  for (int i = 1; i <= 15; i++) { // /(슬래시) 대각선 확인 - 김성렬, MoNiSu
+    for (int j = 5; j <= 19; j++) {
+      if (
+        arr[i][j] != 0
+        && arr[i][j] == arr[i + 1][j - 1]
+        && arr[i + 1][j - 1] == arr[i + 2][j - 2]
+        && arr[i + 2][j - 2] == arr[i + 3][j - 3]
+        && arr[i + 3][j - 3] == arr[i + 4][j - 4]
+        ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+int test(int num) { // 기능 실험 후 비워 둘 것 - MoNiSu
+
   return 0;
 }
