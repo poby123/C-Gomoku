@@ -11,15 +11,15 @@ void drawLine(int num); // 줄 그리는 함수 - MoNiSu
 void drawBoard(void); // 바둑판 그리는 함수 - MoNiSu
 void cursor(short x, short y); // 커서 입력 함수 - MoNiSu
 void playGoStone(int arr[20][20], int num); // 커서 움직이기, 바둑돌 두는 함수 - MoNiSu, 함수 이름 변경과 포인터 이용 - 김성렬
-bool rule(int arr[20][20]); // 오목 승리 조건 - 김성렬
-int test(int num); // 기능 테스트 하는 함수 - MoNiSu
+void checkWin(int arr[20][20], bool* status); // 오목 승리 조건 - 김성렬
 
 void main(void) {
   int board[20][20]; // 0번칸은 안 씀 1번부터 시작 예) board[10][10] == 2 가로 세로 10번째 줄 검은돌 - MoNiSu
   bool gameStatus; // true == 게임 시작 아니면 게임 중, false == 게임 끝 - MoNiSu
+  bool* pGameStatus = &gameStatus; // 포인터를 활용해 게임의 상황을 제어
   int user = 2; // 2 == 검은 돌, 3 == 흰 돌 - MoNiSu
 
-  for (int i = 0; i <= 19; i++) {
+  for (int i = 0; i <= 19; i++) { // 바둑판의 내용을 모두 0으로 채움 - 김성렬, MoNiSu
     for (int j = 0; j <= 19; j++) {
       board[i][j] = 0;
     }
@@ -29,17 +29,11 @@ void main(void) {
   system("cls"); // 콘솔 창 초기화 - MoNiSu
   drawBoard();
 
-  gameStatus = true;
+  *pGameStatus = true;
 
   do {
     playGoStone(board, user);
-
-    if (rule(board)) {
-      system("cls");
-      printf(" ***  %d 가 승리 하였습니다. ***", user);
-      exit(0);
-    }
-
+    checkWin(board, pGameStatus);
     if (user == 2) {
       ++user;
     }
@@ -47,8 +41,18 @@ void main(void) {
       --user;
     }
   } while (gameStatus);
-  
-  //test(1); // 다 쓰면 꼭 주석 처리 해둘 것 - MoNiSu
+
+  system("cls");
+
+  cursor(5, 5);
+  if (user == 3) {
+    printf("***  선공 (흑돌 / ○) 이 승리 하였습니다. ***\n\n\n");
+  }
+  else {
+    printf("***  후공 (백돌 / ●) 이 승리 하였습니다. ***\n\n\n");
+  }
+
+  exit(0);
 }
 
 void hello(void) {
@@ -172,67 +176,56 @@ void playGoStone(int arr[20][20], int num) {
   } while (true);
 }
 
-bool rule(int arr[20][20]) {
-  for (int i = 1; i <= 15; i++) { // 가로 확인 - 김성렬, MoNiSu
-    for (int j = 1; j <= 19; j++) {
-      if (
-        arr[i][j] != 0
-        && arr[i][j] == arr[i + 1][j]
-        && arr[i + 1][j] == arr[i + 2][j]
-        && arr[i + 2][j] == arr[i + 3][j]
-        && arr[i + 3][j] == arr[i + 4][j]
-        ) {
-        return true;
-      }
-    }
-  }
-
-  for (int i = 1; i <= 19; i++) { // 세로 확인 - 김성렬, MoNiSu
-    for (int j = 1; j <= 15; j++) {
-      if (
-        arr [i][j] != 0 
-        && arr[i][j] == arr[i][j + 1]
-        && arr[i][j + 1] == arr[i][j + 2]
-        && arr[i][j + 2] == arr[i][j + 3]
-        && arr[i][j + 3] == arr[i][j + 4]
-        ) {
-        return true;
-      }
-    }
-  }
-
-  for (int i = 1; i <= 15; i++) { // 역슬래시 대각선 확인 - 김성렬, MoNiSu
-    for (int j = 1; j <= 15; j++) {
-      if (
-        arr[i][j] != 0
-        && arr[i][j] == arr[i + 1][j + 1]
-        && arr[i + 1][j + 1] == arr[i + 2][j + 2]
-        && arr[i + 2][j + 2] == arr[i + 3][j + 3]
-        && arr[i + 3][j + 3] == arr[i + 4][j + 4]
-        ) {
-        return true;
-      }
-    }
-  }
-
-  for (int i = 1; i <= 15; i++) { // /(슬래시) 대각선 확인 - 김성렬, MoNiSu
+void checkWin(int arr[20][20], bool* status) {
+  for (int i = 1; i <= 19; i++) { // 구조 개선 - MoNiSu
     for (int j = 5; j <= 19; j++) {
-      if (
-        arr[i][j] != 0
-        && arr[i][j] == arr[i + 1][j - 1]
-        && arr[i + 1][j - 1] == arr[i + 2][j - 2]
-        && arr[i + 2][j - 2] == arr[i + 3][j - 3]
-        && arr[i + 3][j - 3] == arr[i + 4][j - 4]
-        ) {
-        return true;
+      if (i <= 15) {
+        if ( // 가로 확인 - 김성렬, MoNiSu
+          arr[i][j] != 0 &&
+          arr[i][j] == arr[i + 1][j] &&
+          arr[i + 1][j] == arr[i + 2][j] &&
+          arr[i + 2][j] == arr[i + 3][j] &&
+          arr[i + 3][j] == arr[i + 4][j]
+          ) {
+          *status = false;
+        }
+
+        if (j >= 5) {
+          if ( // /(슬래시) 대각선 확인 - 김성렬, MoNiSu
+            arr[i][j] != 0 &&
+            arr[i][j] == arr[i + 1][j - 1] &&
+            arr[i + 1][j - 1] == arr[i + 2][j - 2] &&
+            arr[i + 2][j - 2] == arr[i + 3][j - 3] &&
+            arr[i + 3][j - 3] == arr[i + 4][j - 4]
+            ) {
+            *status = false;
+          }
+        }
+
+        if (j <= 15) {
+          if ( // 역슬래시 대각선 확인 - 김성렬, MoNiSu
+            arr[i][j] != 0 &&
+            arr[i][j] == arr[i + 1][j + 1] &&
+            arr[i + 1][j + 1] == arr[i + 2][j + 2] &&
+            arr[i + 2][j + 2] == arr[i + 3][j + 3] &&
+            arr[i + 3][j + 3] == arr[i + 4][j + 4]
+            ) {
+            *status = false;
+          }
+        }
+      }
+
+      if (j <= 15) {
+        if ( // 세로 확인 - 김성렬, MoNiSu
+          arr[i][j] != 0 &&
+          arr[i][j] == arr[i][j + 1] &&
+          arr[i][j + 1] == arr[i][j + 2] &&
+          arr[i][j + 2] == arr[i][j + 3] &&
+          arr[i][j + 3] == arr[i][j + 4]
+          ) {
+          *status = false;
+        }
       }
     }
   }
-
-  return false;
-}
-
-int test(int num) { // 기능 실험 후 비워 둘 것 - MoNiSu
-
-  return 0;
 }
