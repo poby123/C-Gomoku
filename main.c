@@ -9,14 +9,16 @@
 void hello(void); // 사용자에게 안내 - MoNisu
 void drawLine(int num); // 줄 그리는 함수 - MoNiSu
 void drawBoard(void); // 바둑판 그리는 함수 - MoNiSu
+void sequence(int num); //순서 나타내는 함수 - 김성렬
 void cursor(short x, short y); // 커서 입력 함수 - MoNiSu
 void playGoStone(int arr[20][20], int num); // 커서 움직이기, 바둑돌 두는 함수 - MoNiSu, 함수 이름 변경과 포인터 이용 - 김성렬
-void checkWin(int arr[20][20], bool* status); // 오목 승리 조건 - 김성렬
+void checkRule(int arr[20][20]); //오목 룰 확인 - 김성렬
+void checkWin(int arr[20][20], bool* status); // 오목 승리 조건 - 김성렬, MoNiSu
 
 void main(void) {
   int board[20][20]; // 0번칸은 안 씀 1번부터 시작 예) board[10][10] == 2 가로 세로 10번째 줄 검은돌 - MoNiSu
   bool gameStatus; // true == 게임 시작 아니면 게임 중, false == 게임 끝 - MoNiSu
-  bool* pGameStatus = &gameStatus; // 포인터를 활용해 게임의 상황을 제어
+  bool* pGameStatus = &gameStatus; // 포인터를 활용해 게임의 상황을 제어 - MoNiSu
   int user = 2; // 2 == 검은 돌, 3 == 흰 돌 - MoNiSu
 
   for (int i = 0; i <= 19; i++) { // 바둑판의 내용을 모두 0으로 채움 - 김성렬, MoNiSu
@@ -25,13 +27,14 @@ void main(void) {
     }
   }
 
-  hello();
+  // hello();
   system("cls"); // 콘솔 창 초기화 - MoNiSu
   drawBoard();
 
   *pGameStatus = true;
 
   do {
+    sequence(user);
     playGoStone(board, user);
     checkWin(board, pGameStatus);
     if (user == 2) {
@@ -69,7 +72,7 @@ void drawLine(int num) {
     " ┌", " ├", " └", "─┬", "─┼", "─┴", "─┐", "─┤", "─┘"
   };
   printf("%s", line[num]);
-  Sleep(1); // 테스트 할 시에는 주석 처리 - MoNiSu
+  // Sleep(1); // 테스트 할 시에는 주석 처리 - MoNiSu
 }
 
 void drawBoard(void) {
@@ -110,6 +113,17 @@ void drawBoard(void) {
         }
       }
     }
+  }
+}
+
+void sequence(int num) {
+  if (num == 2) { //흑돌 차례일때 - 김성렬
+    cursor(2, 21);
+    printf("*** 흑돌 차례입니다 (흑돌 / ○) ***");
+  }
+  else { //백돌 차례일때 - 김성렬
+    cursor(2, 21);
+    printf("*** 백돌 차례입니다 (백돌 / ●) ***");
   }
 }
 
@@ -174,6 +188,10 @@ void playGoStone(int arr[20][20], int num) {
       }
     }
   } while (true);
+}
+
+void checkRule(int arr[20][20]) {
+
 }
 
 void checkWin(int arr[20][20], bool* status) {
