@@ -14,16 +14,10 @@ void playGoStone(int arr[20][20], int num); // 커서 움직이기, 바둑돌 두는 함수 -
 void checkWin(int arr[20][20], bool* status); // 오목 승리 조건 - 김성렬
 
 void main(void) {
-  int board[20][20]; // 0번칸은 안 씀 1번부터 시작 예) board[10][10] == 2 가로 세로 10번째 줄 검은돌 - MoNiSu
+  int board[20][20] = { 0 }; // 0번칸은 안 씀 1번부터 시작 예) board[10][10] == 2 가로 세로 10번째 줄 검은돌 - MoNiSu
   bool gameStatus; // true == 게임 시작 아니면 게임 중, false == 게임 끝 - MoNiSu
   bool* pGameStatus = &gameStatus; // 포인터를 활용해 게임의 상황을 제어
   int user = 2; // 2 == 검은 돌, 3 == 흰 돌 - MoNiSu
-
-  for (int i = 0; i <= 19; i++) { // 바둑판의 내용을 모두 0으로 채움 - 김성렬, MoNiSu
-    for (int j = 0; j <= 19; j++) {
-      board[i][j] = 0;
-    }
-  }
 
   hello();
   system("cls"); // 콘솔 창 초기화 - MoNiSu
@@ -65,7 +59,7 @@ void hello(void) {
 }
 
 void drawLine(int num) {
-  char* line[10] = { // int형 자료 선언을 char 포인터 선언으로 변경 후 잘 표시됨 - 김성렬
+  const char* line[10] = { // int형 자료 선언을 char 포인터 선언으로 변경 후 잘 표시됨 - 김성렬
     " ┌", " ├", " └", "─┬", "─┼", "─┴", "─┐", "─┤", "─┘"
   };
   printf("%s", line[num]);
