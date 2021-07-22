@@ -5,8 +5,8 @@ int main(void) {
 	bool gameIsRunning = true;
 	enum GOMOKU_TYPE user = BLACK;
 
-	// hello();
-	system("cls"); // 콘솔 창 초기화 - MoNiSu
+	/*hello();
+	system("cls");*/
 	drawBoard();
 
 	do {
@@ -14,23 +14,16 @@ int main(void) {
 		checkRule(board, user);
 		playGoStone(board, user);
 		checkWin(board, &gameIsRunning);
-		if (user == BLACK) {
-			++user;
-		}
-		else {
-			--user;
-		}
+
+		user = (user == BLACK) ? WHITE : BLACK;
+
 	} while (gameIsRunning);
 
-	system("cls");
-
-	gotoxy(5, 5);
-
 	if (user == BLACK + 1) {
-		printf(BLACK_WINNING_MSG);
+		printMessage(BLACK_WINNING_MSG);
 	}
 	else {
-		printf(WHITE_WINNING_MSG);
+		printMessage(WHITE_WINNING_MSG);
 	}
 
 	return 0;
@@ -91,13 +84,17 @@ void drawBoard(void) {
 	}
 }
 
-void sequence(enum GOMOKU_TYPE user) {
+void printMessage(const char* msg) {
 	gotoxy(2, 21);
+	puts(msg);
+}
+
+void sequence(enum GOMOKU_TYPE user) {
 	if (user == BLACK) {
-		printf(BLACK_TURN_MSG);
+		printMessage(BLACK_TURN_MSG);
 	}
 	else if (user == WHITE) {
-		printf(WHITE_TURN_MSG);
+		printMessage(WHITE_TURN_MSG);
 	}
 }
 
@@ -231,12 +228,11 @@ void checkRule(int arr[20][20], enum GOMOKU_TYPE user) {
 }
 
 void playGoStone(int arr[20][20], enum GOMOKU_TYPE user) {
-	int x = 10, y = 10;
+	static int x = 10, y = 10;
+	const int keyStatus = 0x0001;
 	gotoxy(x, y);
 
-	const int keyStatus = 0x0001;
-
-	do {
+	while (1) {
 		if (GetAsyncKeyState(VK_LEFT) & keyStatus) {
 			--x;
 			if (x < 1) {
@@ -262,73 +258,153 @@ void playGoStone(int arr[20][20], enum GOMOKU_TYPE user) {
 			}
 		}
 		if (GetAsyncKeyState(VK_SPACE) & keyStatus) {
-			if (arr[x][y] == EMPTY) {
+			if (arr[y][x] == EMPTY) {
 				gotoxy(x, y);
 				if (user == BLACK) {
-					printf("○");
-					arr[x][y] = user;
+					printf(BLACK_STONE);
+					arr[y][x] = user;
 				}
 				else {
-					printf("●");
-					arr[x][y] = user;
+					printf(WHITE_STONE);
+					arr[y][x] = user;
 				}
 				break;
 			}
 		}
 		gotoxy(x, y);
-	} while (true);
+	}
 }
 
-void checkWin(int arr[20][20], bool* status) {
+void checkWin(int(*arr)[WIDTH], bool* gameIsRunning) {
+	bool gameIsEnd = checkHorizontal(arr) || checkVertical(arr) || checkDiagonal(arr);
+	*gameIsRunning = !gameIsEnd;
+}
+
+bool checkHorizontal(int(*arr)[WIDTH]) {
 	for (int i = 1; i < HEIGHT; i++) {
-		for (int j = 5; j < WIDTH; j++) {
-			if (i <= 15) {
-				if ( // 가로 확인 - 김성렬, MoNiSu
-					arr[i][j] != 0 &&
-					arr[i][j] == arr[i + 1][j] &&
-					arr[i + 1][j] == arr[i + 2][j] &&
-					arr[i + 2][j] == arr[i + 3][j] &&
-					arr[i + 3][j] == arr[i + 4][j]
-					) {
-					*status = false;
-				}
+		int black_num = 0, white_num = 0;
 
-				if (j >= 5) {
-					if ( // /(슬래시) 대각선 확인 - 김성렬, MoNiSu
-						arr[i][j] != 0 &&
-						arr[i][j] == arr[i + 1][j - 1] &&
-						arr[i + 1][j - 1] == arr[i + 2][j - 2] &&
-						arr[i + 2][j - 2] == arr[i + 3][j - 3] &&
-						arr[i + 3][j - 3] == arr[i + 4][j - 4]
-						) {
-						*status = false;
-					}
+		for (int j = 1; j < WIDTH; j++) {
+			if (arr[i][j] == BLACK) {
+				if (white_num == 5) {
+					break;
 				}
-
-				if (j <= 15) {
-					if ( // 역슬래시 대각선 확인 - 김성렬, MoNiSu
-						arr[i][j] != 0 &&
-						arr[i][j] == arr[i + 1][j + 1] &&
-						arr[i + 1][j + 1] == arr[i + 2][j + 2] &&
-						arr[i + 2][j + 2] == arr[i + 3][j + 3] &&
-						arr[i + 3][j + 3] == arr[i + 4][j + 4]
-						) {
-						*status = false;
-					}
-				}
+				white_num = 0;
+				++black_num;
 			}
-
-			if (j <= 15) {
-				if ( // 세로 확인 - 김성렬, MoNiSu
-					arr[i][j] != 0 &&
-					arr[i][j] == arr[i][j + 1] &&
-					arr[i][j + 1] == arr[i][j + 2] &&
-					arr[i][j + 2] == arr[i][j + 3] &&
-					arr[i][j + 3] == arr[i][j + 4]
-					) {
-					*status = false;
+			else if (arr[i][j] == WHITE) {
+				if (black_num == 5) {
+					break;
 				}
+				black_num = 0;
+				++white_num;
+			}
+			else {
+				if (black_num == 5 || white_num == 5) {
+					break;
+				}
+				black_num = white_num = 0;
 			}
 		}
+	
+		if (black_num == 5 || white_num == 5) {
+			return true;
+		}
 	}
+
+	return false;
+}
+
+bool checkVertical(int(*arr)[WIDTH]) {
+	for (int j = 1; j < WIDTH; j++) {
+		int black_num = 0, white_num = 0;
+
+		for (int i = 1; i < HEIGHT; i++) {
+			if (arr[i][j] == BLACK) {
+				if (white_num == 5) {
+					break;
+				}
+				white_num = 0;
+				++black_num;
+			}
+			else if (arr[i][j] == WHITE) {
+				if (black_num == 5) {
+					break;
+				}
+				black_num = 0;
+				++white_num;
+			}
+			else {
+				if (black_num == 5 || white_num == 5) {
+					break;
+				}
+				black_num = white_num = 0;
+			}
+		}
+
+		if (black_num == 5 || white_num == 5) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isInBoard(int y, int x) {
+	return 0 < y && y < HEIGHT && 0 < x && x < WIDTH;
+}
+
+bool checkDiagonal(int(*arr)[WIDTH]) {
+	// iterate y-axis
+	for (int i = 1; i < HEIGHT; i++) {
+		bool result = iterateDiagonal(arr, i, 1, LEFT_TO_RIGHT) || iterateDiagonal(arr, i, WIDTH-1, RIGHT_TO_LEFT);
+		if (result) {
+			return result;
+		}
+	}
+
+	// iterate x-axis
+	for (int j = 1; j < WIDTH; j++) {
+		bool result = iterateDiagonal(arr, 1, j, LEFT_TO_RIGHT) || iterateDiagonal(arr, 1, j, RIGHT_TO_LEFT);
+		if (result) {
+			return result;
+		}
+	}
+
+	return false;
+}
+
+bool iterateDiagonal(int(*arr)[WIDTH], int y, int x, enum DIAGNOAL_TYPE type) {
+	int black_num = 0, white_num = 0;
+
+	while (isInBoard(y, x)) {
+		if (arr[y][x] == BLACK) {
+			if (white_num == 5) {
+				break;
+			}
+			white_num = 0;
+			++black_num;
+		}
+		else if (arr[y][x] == WHITE) {
+			if (black_num == 5) {
+				break;
+			}
+			black_num = 0;
+			++white_num;
+		}
+		else {
+			if (black_num == 5 || white_num == 5) {
+				break;
+			}
+			black_num = white_num = 0;
+		}
+
+		++y; 
+		type == LEFT_TO_RIGHT ? ++x : --x;
+	}
+
+	if (black_num == 5 || white_num == 5) {
+		return true;
+	}
+
+	return false;
 }
